@@ -86,7 +86,35 @@ public class Frequencer implements FrequencerInterface{
         
          //ここに、int suffixArrayをソートするコードを書け。
          //順番はsuffixCompareで定義されるものとする。
-        int tmp =0;
+        quicksort(suffixArray, 0, suffixArray.length-1);
+    }
+        
+        private void quicksort(int[] array, int left, int right){
+            if(left <= right){
+                int p = right;
+                int r = right;
+                int l = left;
+                while(l <= r){
+                    while(suffixCompare(suffixArray[l], suffixArray[p]) == -1){
+                        l++;
+                    }
+                    while(suffixCompare(suffixArray[r], suffixArray[p]) == 1){
+                        r--;
+                    }
+                    if(l <= r){
+                        int tmp = array[l];
+                        array[l] = array[r];
+                        array[r] = tmp;
+                        l++;
+                        r--;
+                    }
+                }
+                quicksort(array, left, r);
+                quicksort(array, l ,right);
+            }
+        }
+        
+        /*int tmp =0;
         
         for(int i = 0; i < mySpace.length-1; i++){
             for(int j = 0; j < mySpace.length-1-i; j++){
@@ -97,12 +125,13 @@ public class Frequencer implements FrequencerInterface{
                 }
             }
         }
-    }
+    }*/
     
      //Suffix Arrayを用いて、文字列の頻度を求めるコード
      //ここから、指定する範囲のコードは変更してはならない。
     public void setTarget(byte [] target) {
-        myTarget = target; if(myTarget.length>0) targetReady = true;
+        myTarget = target;
+        if(myTarget.length>0) targetReady = true;
     }
     
     public int frequency() {
@@ -211,10 +240,31 @@ public class Frequencer implements FrequencerInterface{
         
          //ここにコードを記述せよ。
         
-        for(int i = 0; i < suffixArray.length; i++){
-            if(targetCompare(suffixArray[i],start,end) == 0) return i;
+        int lower = 0;
+        int upper = suffixArray.length - 1;
+        int pos = upper + 1;
+        OUTER: while(lower <= upper){
+            int mid = (lower + upper)/2;
+            switch(targetCompare(suffixArray[mid],start,end)){
+                case 0:
+                    if(mid == 0){
+                        return 0;
+                    }else if(targetCompare(suffixArray[mid - 1],start,end) == 0){
+                        upper = mid - 1;
+                    }else{
+                        pos = mid;
+                        break OUTER;
+                    }
+                    break;
+                case -1:
+                    lower = mid + 1;
+                    break;
+                default:
+                    upper = mid - 1;
+                    break;
+            }
         }
-        return -1;
+        return pos; // このコードは変更しなければならない。
     }
     
     private int subByteEndIndex(int start, int end) {
@@ -241,10 +291,34 @@ public class Frequencer implements FrequencerInterface{
          if target_start_end is"i", it will return 9 for "Hi Ho Hi Ho".*/
         //ここにコードを記述せよ
         
-        for(int i = suffixArray.length-1; i >= 0; i--){
-            if(targetCompare(suffixArray[i],start,end) == 0) return i+1;
+        int lower = 0;
+        int upper = suffixArray.length - 1;
+        int pos = upper + 1;
+        OUTER: while(lower <= upper){
+            int mid = (lower + upper)/2;
+            switch(targetCompare(suffixArray[mid],start,end)){
+                case 0:
+                    if(mid == 0){
+                        return 0;
+                    }else if(mid == suffixArray.length - 1){
+                        pos = mid + 1;
+                        break OUTER;
+                    }else if(targetCompare(suffixArray[mid + 1],start,end) == 0){
+                        lower = mid + 1;
+                    }else{
+                        pos = mid + 1;
+                        break OUTER;
+                    }
+                    break;
+                case -1:
+                    lower = mid + 1;
+                    break;
+                default:
+                    upper = mid - 1;
+                break;
+            }
         }
-        return -1;
+        return pos; // このコードは変更しなければならない。
     }
     
     
